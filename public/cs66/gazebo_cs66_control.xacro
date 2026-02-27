@@ -1,0 +1,89 @@
+<?xml version="1.0" encoding="utf-8"?>
+<robot name="cs66" xmlns:xacro="http://ros.org/wiki/xacro">
+
+	<xacro:macro name="gazebo_self_collide" params="link_name">
+	    <gazebo reference="${link_name}">
+		<selfCollide>true</selfCollide>
+	    </gazebo>
+	</xacro:macro>
+
+	<xacro:macro name="simple_transmission" params="joint_name actuator_name">
+	    <transmission name="${joint_name}_trans">
+		<type>transmission_interface/SimpleTransmission</type>
+		<joint name="${joint_name}">
+		    <hardwareInterface>hardware_interface/PositionJointInterface</hardwareInterface>
+		</joint>
+		<actuator name="${actuator_name}">
+		    <hardwareInterface>hardware_interface/PositionJointInterface</hardwareInterface>
+		    <mechanicalReduction>1</mechanicalReduction>
+		</actuator>
+	    </transmission>
+	</xacro:macro>
+	
+<!-- This macro call for adding gazebo control to the urdf -->
+	<xacro:macro name="gz_control">
+
+		<gazebo>
+    	  <plugin filename="ign_ros2_control-system" name="ign_ros2_control::IgnitionROS2ControlPlugin">
+    	    <parameters>$(find ec_config)/config/cs66/cs66_traj_ctrl.yaml</parameters>
+    	  </plugin>
+  		</gazebo>
+
+		<!-- ROS 2 Control Block -->
+    	<ros2_control name="cs66" type="system">
+    	  <hardware>
+    	    <plugin>ign_ros2_control/IgnitionSystem</plugin>
+    	  </hardware>
+    	  <joint name="joint1">
+    	    <command_interface name="position"/>
+    	    <state_interface name="position"/>
+    	    <state_interface name="velocity"/>
+    	  </joint>
+    	  <joint name="joint2">
+    	    <command_interface name="position"/>
+    	    <state_interface name="position"/>
+    	    <state_interface name="velocity"/>
+    	  </joint>
+    	  <joint name="joint3">
+    	    <command_interface name="position"/>
+    	    <state_interface name="position"/>
+    	    <state_interface name="velocity"/>
+    	  </joint>
+    	  <joint name="joint4">
+    	    <command_interface name="position"/>
+    	    <state_interface name="position"/>
+    	    <state_interface name="velocity"/>
+    	  </joint>
+    	  <joint name="joint5">
+    	    <command_interface name="position"/>
+    	    <state_interface name="position"/>
+    	    <state_interface name="velocity"/>
+    	  </joint>
+    	  <joint name="joint6">
+    	    <command_interface name="position"/>
+    	    <state_interface name="position"/>
+    	    <state_interface name="velocity"/>
+    	  </joint>
+    	</ros2_control>
+
+	  <!-- Applying gazebo_self_collide macro -->
+	  <xacro:gazebo_self_collide link_name="base_link"/>
+	  <xacro:gazebo_self_collide link_name="link1"/>
+	  <xacro:gazebo_self_collide link_name="link2"/>
+	  <xacro:gazebo_self_collide link_name="link3"/>
+	  <xacro:gazebo_self_collide link_name="link4"/>
+	  <xacro:gazebo_self_collide link_name="link5"/>
+	  <xacro:gazebo_self_collide link_name="link6"/>
+	  <xacro:gazebo_self_collide link_name="flan"/>
+
+	  <!-- Applying simple_transmission macro -->
+	  <xacro:simple_transmission joint_name="joint1" actuator_name="joint1_motor"/>
+	  <xacro:simple_transmission joint_name="joint2" actuator_name="joint2_motor"/>
+	  <xacro:simple_transmission joint_name="joint3" actuator_name="joint3_motor"/>
+	  <xacro:simple_transmission joint_name="joint4" actuator_name="joint4_motor"/>
+	  <xacro:simple_transmission joint_name="joint5" actuator_name="joint5_motor"/>
+	  <xacro:simple_transmission joint_name="joint6" actuator_name="joint6_motor"/>
+
+	</xacro:macro>
+
+</robot>

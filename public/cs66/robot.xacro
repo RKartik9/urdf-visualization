@@ -1,0 +1,162 @@
+<?xml version="1.0"?>
+<robot name="cs66" xmlns:xacro="http://wiki.ros.org/xacro">
+
+
+    <xacro:include filename="$(find ec_description)/urdf/cs66/cs66.xacro"/>     
+
+    <xacro:arg name="workspace" default="empty"/>
+    <xacro:arg name="add_holder" default="false"/>
+    <xacro:arg name="holder_model" default="camera_holder"/>
+    <xacro:arg name="add_camera" default="false"/>
+    <xacro:arg name="add_top_cam" default="false"/>
+
+    <xacro:property name="add_camera" value="$(arg add_camera)"/>
+    <xacro:property name="workspace" value="$(arg workspace)"/>
+    <xacro:property name="add_holder" value="$(arg add_holder)"/>
+    <xacro:property name="holder_model" value="$(arg holder_model)"/>
+    <xacro:property name="add_top_cam" value="$(arg add_top_cam)"/>
+
+
+    <xacro:if value="$(arg add_holder)">
+            <xacro:include filename="$(find ec_description)/urdf/camera_holder/$(arg holder_model).xacro"/>
+            <xacro:holder parent="flan"/> 
+            <xacro:include filename="$(find robotiq_description)/urdf/robotiq_2f_85_gripper.urdf.xacro"/>
+            <xacro:robotiq_gripper parent="camera_holder">
+             <origin xyz="0.055 0.037 0.010" rpy="0 0 1.57"/>
+            </xacro:robotiq_gripper>        
+    </xacro:if>
+
+    <xacro:unless value="$(arg add_holder)">
+    <xacro:if value="${workspace !='box_packing' and workspace !='labelling' and workspace !='case_erection' and workspace !='welding_of_hvac_part' and workspace !='pcb_assembly' and workspace !='welding_of_circular_part' and workspace !='grinding_application' and workspace !='cupcake_sorting' and workspace !='box_sorting' and workspace !='spray_painting_of_spring'}">
+            <xacro:include filename="$(find robotiq_description)/urdf/robotiq_2f_85_gripper.urdf.xacro"/>
+            <xacro:robotiq_gripper parent="flan">
+                         <origin xyz="0 0 0" rpy="0 0 0"/>
+            </xacro:robotiq_gripper>     
+    </xacro:if>
+    </xacro:unless>    <xacro:if value="$(arg add_camera)">
+
+        <xacro:include filename="$(find ec_description)/urdf/cam/d435/camera.xacro" />
+    </xacro:if>
+
+    <xacro:if value="$(arg add_top_cam)">
+        <xacro:include filename="$(find ec_description)/urdf/cam/d435/top_mount_cam.xacro" />
+    </xacro:if>
+
+    <xacro:if value="${workspace == 'empty'}">
+        <xacro:cs66_arm world_offset="0 0 1.07" rpy="0 0 0"/>   
+        <xacro:include filename="$(find ec_description)/urdf/cam/d435/scene_camera.xacro"/>
+        <xacro:scene_cam scene_cam_offset="3.14 2.90 -1.57" scene_cam_rpy="3.14 2.90 -1.57"/>
+    </xacro:if>
+
+
+    <xacro:if value="${workspace == 'grinding_application'}">
+        <xacro:cs66_arm world_offset="-1.30 1.0992 0.57" rpy="0 0 0"/>
+        <xacro:include filename="$(find ec_description)/urdf/cam/d435/scene_camera.xacro"/>
+        <xacro:scene_cam scene_cam_offset="0.0 -2.7 1.8" scene_cam_rpy="3.14 2.90 -1.57"/>
+        <xacro:include filename="$(find ec_description)/urdf/grippers/iihl/grinding_gripper.xacro"/>
+        <xacro:grinding_gripper parent="flan" add_offset="0 0 0" add_rpy="0 0 0"/>  
+    </xacro:if>
+
+
+    <xacro:if value="${workspace == 'machine_tending_with_pocketnc'}">
+        <xacro:include filename="$(find ec_description)/urdf/cam/d435/scene_camera.xacro"/>
+        <xacro:cs66_arm world_offset="-1.38 1.28 1.08" rpy="0 0 0"/>  
+        <xacro:scene_cam scene_cam_offset="-1.9 0.0 1.9" scene_cam_rpy="3.14 2.80 3.14"/>
+    </xacro:if>
+    
+    <xacro:if value="${workspace == 'cupcake_sorting'}">
+        <xacro:include filename="$(find ec_description)/urdf/cam/d435/scene_camera.xacro"/>
+        <xacro:cs66_arm world_offset="-1.6667 2.0558 0.612" rpy="0 0 0"/>  
+        <xacro:scene_cam scene_cam_offset="-4.5 0.0 1.9" scene_cam_rpy="3.14 2.80 3.14"/>
+        <xacro:include filename="$(find ec_description)/urdf/grippers/priya_gold/priya_gold_gripper.xacro"/>
+        <xacro:priya_gold_gripper parent="flan" add_offset="0 0 0" add_rpy="3.14 0 0"/>
+    </xacro:if>
+
+    <xacro:if value="${workspace == 'spray_painting_of_spring'}">
+        <xacro:include filename="$(find ec_description)/urdf/cam/d435/scene_camera.xacro"/>
+        <xacro:cs66_arm world_offset="-1.38 1.28 0.612" rpy="0 0 0"/>  
+        <xacro:scene_cam scene_cam_offset="-4.5 0.0 1.9" scene_cam_rpy="3.14 2.80 3.14"/>
+        <xacro:include filename="$(find ec_description)/urdf/grippers/plasma_gun/plasma_gun.xacro"/>
+        <xacro:plasma_gun parent="flan" add_offset="0.0 0.0 -0.01" add_rpy="0 0 3.14"/>
+    </xacro:if>
+
+    <xacro:if value="${workspace == 'welding_of_hvac_part'}">
+        <xacro:cs66_arm world_offset="-1.38 1.28 1.08" rpy="0 0 0"/>  
+        <xacro:include filename="$(find ec_description)/urdf/cam/d435/scene_camera.xacro"/>
+        <xacro:scene_cam scene_cam_offset="-1.9 0.0 1.9" scene_cam_rpy="3.14 2.80 3.14"/> 
+        <xacro:include filename="$(find ec_description)/urdf/grippers/welding/welding_gun.xacro"/>
+        <xacro:welding_gripper parent="flan" add_offset="0 0 0" add_rpy="0 0 0"/>
+    </xacro:if>
+
+
+    <xacro:if value="${workspace == 'welding_of_circular_part'}">
+        <xacro:cs66_arm world_offset="-1.38 1.28 1.08" rpy="0 0 0"/>  
+        <xacro:include filename="$(find ec_description)/urdf/cam/d435/scene_camera.xacro"/>
+        <xacro:scene_cam scene_cam_offset="-1.9 0.0 1.9" scene_cam_rpy="3.14 2.80 3.14"/> 
+        <xacro:include filename="$(find ec_description)/urdf/grippers/welding/welding_gun.xacro"/>
+        <xacro:welding_gripper parent="flan" add_offset="0 0 0" add_rpy="0 0 0"/>
+    </xacro:if>
+
+
+    <xacro:if value="${workspace == 'vmc_machine_tending'}">
+        <xacro:cs66_arm world_offset="-1.95 1.30 0.62" rpy="0 0 0"/>  
+        <xacro:include filename="$(find ec_description)/urdf/cam/d435/scene_camera.xacro"/>
+        <xacro:scene_cam scene_cam_offset="-1.9 0.0 1.9" scene_cam_rpy="3.14 2.80 3.14"/>
+    </xacro:if>
+
+    <xacro:if value="${workspace == 'cnc_machine_tending'}">
+        <xacro:cs66_arm world_offset="-1.95 1.30 0.62" rpy="0 0 0"/>  
+        <xacro:include filename="$(find ec_description)/urdf/cam/d435/scene_camera.xacro"/>
+        <xacro:scene_cam scene_cam_offset="-1.9 0.0 1.9" scene_cam_rpy="3.14 2.80 3.14"/> 
+    </xacro:if>
+
+    <!-- <xacro:if value="${workspace == 'engine_assembly'}">
+        <xacro:cs66_arm world_offset="-2.7 0.48 1.83"/>  
+        <xacro:include filename="$(find ec_description)/urdf/cam/d435/scene_camera.xacro"/>
+        <xacro:scene_cam scene_cam_offset="-1.9 0.0 1.9" scene_cam_rpy="3.14 2.80 3.14"/>
+    </xacro:if> -->
+
+
+    <xacro:if value="${workspace == 'box_sorting'}">
+        <xacro:include filename="$(find ec_description)/urdf/cam/d435/scene_camera.xacro"/>
+        <xacro:cs66_arm world_offset="-1.38 1.45 0.62" rpy="0 0 0"/>  
+        <xacro:scene_cam scene_cam_offset="-4.5 0.0 1.9" scene_cam_rpy="3.14 2.80 3.14"/>
+        <xacro:include filename="$(find ec_description)/urdf/grippers/vacuum/vacuum_gripper.xacro"/>
+        <xacro:vacuum_gripper parent="flan" add_offset="0.0 0.0 -0.01" add_rpy="0 -1.57 0"/>          
+    </xacro:if>
+
+    <xacro:if value="${workspace == 'box_packing'}">
+        <xacro:cs66_arm world_offset="0.4117 1.5990 0.62" rpy="0 0 0"/>  
+        <xacro:include filename="$(find ec_description)/urdf/cam/d435/scene_camera.xacro"/>
+        <xacro:scene_cam scene_cam_offset="-1.9 0.0 1.9" scene_cam_rpy="3.14 2.80 3.14"/>
+        <xacro:include filename="$(find ec_description)/urdf/grippers/box_packing/jar_gripper.xacro"/>
+        <xacro:jar_gripper parent="flan" add_offset="0.0 0.0 0.0" add_rpy="-1.57 0 1.57"/>   
+    </xacro:if>
+
+    <xacro:if value="${workspace == 'case_erection'}">
+        <xacro:cs66_arm world_offset="0.0276 1.6750 0.62" rpy="0 0 0"/>  
+        <xacro:include filename="$(find ec_description)/urdf/cam/d435/scene_camera.xacro"/>
+        <xacro:scene_cam scene_cam_offset="-1.9 0.0 1.9" scene_cam_rpy="3.14 2.80 3.14"/>
+        <xacro:include filename="$(find ec_description)/urdf/grippers/case_erector/case_erector_gripper.xacro"/>
+        <xacro:case_erector_gripper parent="flan" add_offset="0.0 0.0 0.0" add_rpy="3.14 0 1.57"/>   
+    </xacro:if>
+
+    <xacro:if value="${workspace == 'pcb_assembly'}">
+        <xacro:include filename="$(find ec_description)/urdf/cam/d435/scene_camera.xacro"/>
+        <xacro:cs66_arm world_offset="-0.15 0.55 0.92" rpy="0 0 0"/>  
+        <xacro:scene_cam scene_cam_offset="-1.9 0.0 1.9" scene_cam_rpy="3.14 2.80 3.14"/>
+        <xacro:include filename="$(find ec_description)/urdf/grippers/dual/dual_gripper.xacro"/>
+        <xacro:dual_gripper parent="flan" add_offset="0 0 -0.01" add_rpy="-1.57 0 0"/>  
+    </xacro:if>
+
+    <xacro:if value="${workspace == 'labelling'}">
+        <xacro:include filename="$(find ec_description)/urdf/cam/d435/scene_camera.xacro"/>
+        <xacro:cs66_arm world_offset="-1.38 1.45 0.62" rpy="0 0 0"/>  
+        <xacro:scene_cam scene_cam_offset="-1.9 0.0 1.9" scene_cam_rpy="3.14 2.80 3.14"/>
+        <xacro:include filename="$(find ec_description)/urdf/grippers/labelling_gripper/labelling_gripper.xacro"/>
+        <xacro:labelling_gripper parent="flan" add_offset="0 0 0" add_rpy="-1.57 0 0"/>  
+    </xacro:if>
+
+    <xacro:gz_control/>
+
+</robot>
