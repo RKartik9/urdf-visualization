@@ -1,36 +1,39 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# RobotViz
 
-## Getting Started
+A web-based 3D robot visualization tool. Visualize robot arms from URDF files with STL and DAE mesh support.
 
-First, run the development server:
+## How to Use
+
+### Running the App
 
 ```bash
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Open http://localhost:3000 in your browser.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+### Loading a Robot
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+1. **Default**: EC63 robot arm loads automatically on startup
+2. **Custom Robot**: Drag and drop multiple files (URDF + meshes) or click to select all files at once
+3. The app parses the URDF automatically and loads mesh files
 
-## Learn More
+### File Requirements
 
-To learn more about Next.js, take a look at the following resources:
+Upload folder must contain:
+- One `.urdf` file describing robot structure
+- Mesh files (`.STL` or `.dae`) referenced in the URDF
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+Mesh file names must match the link names in the URDF (e.g., `base_link.STL`, `link1.STL`).
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+### Joint Control
 
-## Deploy on Vercel
+- Use sliders to manually control each joint
+- Values are in radians
+- Joint limits from URDF are applied automatically
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+### ROS Connection
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+1. Enter WebSocket URL (default: `ws://localhost:9090`)
+2. Click Connect
+3. Robot joints update from `/joint_states` topic
