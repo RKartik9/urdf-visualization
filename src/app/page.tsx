@@ -711,7 +711,7 @@ export default function Home() {
   };
 
   return (
-    <div className="min-h-screen mesh-gradient">
+    <div className="h-full overflow-hidden mesh-gradient ">
       <div className="fixed top-0 left-0 right-0 z-50 glass-panel border-t-0 border-x-0 rounded-none">
         <div className="max-w-screen-2xl mx-auto px-6 py-4 flex items-center justify-between">
           <div className="flex items-center gap-3">
@@ -731,12 +731,22 @@ export default function Home() {
         </div>
       </div>
 
-      <div className="pt-24 pb-8 px-6 max-w-screen-2xl mx-auto">
-        <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
-          <div className="lg:col-span-3">
+      <div className="h-full pt-24 pb-8 px-6 max-w-screen-2xl mx-auto overflow-hidden">
+        <div className="grid grid-cols-1 lg:grid-cols-4 gap-6 h-full overflow-hidden">
+          <div className="lg:col-span-3 overflow-hidden">
             <div
               className="glass-panel glow-cyan overflow-hidden relative"
-              style={{ height: "70vh" }}
+              style={{ height: "70vh", overscrollBehavior: "contain" as any }}
+              onWheel={(e) => {
+                // prevent the page from scrolling when the user scrolls over the RViz canvas
+                e.stopPropagation();
+                e.preventDefault();
+              }}
+              onTouchMove={(e) => {
+                // also prevent touch-driven page scroll when interacting with the canvas on touch devices
+                e.stopPropagation();
+                e.preventDefault();
+              }}
             >
               {loading && (
                 <div className="absolute inset-0 flex items-center justify-center z-10 bg-black/50">
@@ -767,7 +777,7 @@ export default function Home() {
             </div>
           </div>
 
-          <div className="space-y-6">
+          <div className="space-y-6 overflow-y-auto h-full">
             <div className="glass-panel p-4">
               <h3 className="text-xs font-semibold text-zinc-500 uppercase tracking-wider mb-4">
                 Robot Model
@@ -936,4 +946,29 @@ export default function Home() {
       </div>
     </div>
   );
+}
+
+// ensure we attach a non-passive wheel/touchmove listener to the canvas container so
+// preventDefault() calls actually stop native scrolling on all browsers.
+// We do this by adding a delegated listener to elements with the glass-panel class wrapping the Canvas.
+if (typeof window !== "undefined") {
+  // run after mount
+  setTimeout(() => {
+    const el = document.querySelector(
+      ".glass-panel.glow-cyan.overflow-hidden.relative",
+    );
+    if (!el) return;
+    const wheelHandler = (ev: Event) => {
+      try {
+        (ev as Event & { cancelable: boolean }).preventDefault();
+        ev.stopPropagation();
+      } catch {}
+    };
+    el.addEventListener("wheel", wheelHandler as EventListener, {
+      passive: false,
+    });
+    el.addEventListener("touchmove", wheelHandler as EventListener, {
+      passive: false,
+    });
+  }, 500);
 }
