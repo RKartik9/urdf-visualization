@@ -384,9 +384,10 @@ export default function RobotFlow() {
       }
       const parsed = JSON.parse(raw);
       if (Array.isArray(parsed.nodes) && Array.isArray(parsed.edges)) {
-        setNodes(parsed.nodes as Node[]);
+        const reconstructed = reconstructNodes(parsed.nodes);
+        setNodes(reconstructed);
         setEdges(parsed.edges as Edge[]);
-        historyRef.current = [{ nodes: parsed.nodes, edges: parsed.edges }];
+        historyRef.current = [{ nodes: reconstructed, edges: parsed.edges }];
         historyIndexRef.current = 0;
         showToast("Loaded flow from localStorage", "success");
       } else {
@@ -404,10 +405,11 @@ export default function RobotFlow() {
       try {
         const parsed = JSON.parse(String(reader.result || "{}"));
         if (Array.isArray(parsed.nodes) && Array.isArray(parsed.edges)) {
-          setNodes(parsed.nodes as Node[]);
+          const reconstructed = reconstructNodes(parsed.nodes);
+          setNodes(reconstructed);
           setEdges(parsed.edges as Edge[]);
           // reset history
-          historyRef.current = [{ nodes: parsed.nodes, edges: parsed.edges }];
+          historyRef.current = [{ nodes: reconstructed, edges: parsed.edges }];
           historyIndexRef.current = 0;
         }
       } catch (e) {
@@ -416,6 +418,44 @@ export default function RobotFlow() {
     };
     reader.readAsText(file);
   };
+
+  // helper to reattach callbacks and ensure node data shape after loading from storage/file
+  const reconstructNodes = (rawNodes: any[]): Node[] => {
+    return rawNodes.map((n) => {
+      const data = n.data || {};
+      return {
+        ...n,
+        data: {
+          ...data,
+          // ensure fields array exists (so ActionNode can render)
+          fields: data.fields || [],
+          // reattach onChange so in-node edits update React state
+          onChange: (id: string, updatedData: any) => {
+            setNodes((nds) => nds.map((node) => (node.id === id ? { ...node, data: updatedData } : node)));
+          },
+        },
+      } as Node;
+    });
+  };
+
+  // try to auto-load saved flow from localStorage on mount
+  useEffect(() => {
+    try {
+      const raw = localStorage.getItem("robot_flow_saved");
+      if (!raw) return;
+      const parsed = JSON.parse(raw);
+      if (Array.isArray(parsed.nodes) && Array.isArray(parsed.edges)) {
+        const reconstructed = reconstructNodes(parsed.nodes);
+        setNodes(reconstructed);
+        setEdges(parsed.edges as Edge[]);
+        historyRef.current = [{ nodes: reconstructed, edges: parsed.edges }];
+        historyIndexRef.current = 0;
+        showToast("Loaded flow from localStorage", "success");
+      }
+    } catch (e) {
+      // ignore parse errors on mount
+    }
+  }, []);
 
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
